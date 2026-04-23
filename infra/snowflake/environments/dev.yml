@@ -1,0 +1,28 @@
+# infra/snowflake/dev.yml
+# Configuração completa do schemachange para o ambiente DEV.
+
+# ─────────────────────────────────────────────────────────────
+# Root folder (onde estão os V*.sql), relativo a este YAML
+# ─────────────────────────────────────────────────────────────
+root-folder: "./infra/snowflake/migrations"
+
+# ─────────────────────────────────────────────────────────────
+# Histórico
+# ─────────────────────────────────────────────────────────────
+change-history-table: "METADATA.SCHEMACHANGE.CHANGE_HISTORY_DEV"
+create-change-history-table: true
+
+# ─────────────────────────────────────────────────────────────
+# Runtime
+# ─────────────────────────────────────────────────────────────
+autocommit: false
+dry-run: false
+verbose: false
+
+# ─────────────────────────────────────────────────────────────
+# Variáveis Jinja injetadas nas migrations
+# ─────────────────────────────────────────────────────────────
+vars:
+  env: "dev"
+  database_name: "ANALYTICS_DEV"
+  project_name: "event-driven-ecommerce-analytics"

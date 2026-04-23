@@ -1,0 +1,27 @@
+# .gitignore
+
+# Ambiente local — jamais commitado
+.env
+.env.local
+*.p8
+*.pem
+*.key
+*.ps1
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# schemachange artifacts (logs locais)
+schemachange.log
