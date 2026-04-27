@@ -7,31 +7,25 @@ de infraestrutura como código.
 
 ## Visão de alto nível
 
-GCP                                         Snowflake
-┌─────────────────────────────────────┐    ┌─────────────────────────────────┐
-│                                     │    │                                 │
-│  Cloud Function (gera eventos)      │    │  Bronze (raw VARIANT)           │
-│           │                         │    │      │                          │
-│           ▼                         │    │      ▼                          │
-│  GCS bucket /events/                │───▶│  Silver (Dynamic Tables)        │
-│           │                         │    │      │                          │
-│           ▼                         │    │      ▼                          │
-│  Pub/Sub notification               │    │  Gold (dbt — fact/dim)          │
-│           │                         │    │      │                          │
-│           ▼                         │    │      ▼                          │
-│  Subscription (PULL)                │    │  Marts (analytics-ready)        │
-│                                     │    │                                 │
-└─────────────────────────────────────┘    └─────────────────────────────────┘
-▲
-│
-┌──────────────────────────┴──────────────┐
-│                                         │
-schemachange (migrations versionadas)
-dbt (transformações Gold)
-GitHub Actions (CI/CD)
+```text
+       GCP                               Snowflake
+
+  Cloud Function                    Bronze (raw VARIANT)
+  (gera eventos)                            |
+       |                                    v
+       v                            Silver (Dynamic Tables)
+  GCS bucket /events/                       |
+       |                                    v
+       v                            Gold (dbt — fact, dim)
+  Pub/Sub notification                      |
+       |                                    v
+       v                            Marts (analytics-ready)
+  Subscription PULL ----> Snowpipe -----+
+                          (auto-ingest)
+```
 
 
-Diagrama detalhado abaixo.
+
 
 ## Características
 
@@ -67,7 +61,24 @@ Diagrama detalhado abaixo.
 
 ## Arquitetura detalhada
 
-
+```text
+.
+├── infra/
+│   └── snowflake/
+│       ├── environments/        # configs schemachange por ambiente
+│       │   ├── dev.yml
+│       │   ├── qa.yml
+│       │   └── prod.yml
+│       ├── migrations/          # SQL versionado (V001, V002, ...)
+│       └── repeatable/          # scripts repeatable (R__*.sql)
+├── ingestion/                   # Cloud Functions (produtor de eventos)
+├── dbt/                         # projeto dbt (camada Gold)
+├── scripts/                     # automação local (setup, deploy, key-pair)
+├── docs/
+│   ├── runbooks/                # passos manuais documentados
+│   └── adr/                     # decisões arquiteturais
+└── .github/workflows/           # CI/CD pipelines
+```
 
 ## Modelagem dimensional
 
