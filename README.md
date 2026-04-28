@@ -102,6 +102,7 @@ ao domínio de e-commerce:
 
 ## Estrutura do repositório
 
+```text
 .
 ├── infra/
 │   └── snowflake/
@@ -118,6 +119,7 @@ ao domínio de e-commerce:
 │   ├── runbooks/                # passos manuais documentados
 │   └── adr/                     # decisões arquiteturais
 └── .github/workflows/           # CI/CD pipelines
+```
 
 ## Decisões de arquitetura
 
