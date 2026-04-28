@@ -2,8 +2,8 @@
 
 Pipeline de analytics event-driven sobre dados de e-commerce, integrando Google
 Cloud Platform e Snowflake. O projeto cobre ingestão em tempo real via Pub/Sub e
-Snowpipe, modelagem dimensional em camadas (medalhão), e versionamento completo
-de infraestrutura como código.
+Snowpipe, modelagem dimensional em camadas (arquitetura medalhão), e versionamento completo
+de infraestrutura como código com schemachange e Github Actions.
 
 ## Visão de alto nível
 
@@ -33,12 +33,12 @@ de infraestrutura como código.
   a notificações da etapa anterior — Cloud Function trigger, GCS object create,
   Pub/Sub message, Snowpipe auto-ingest.
 - **Três ambientes isolados**: DEV, QA e PROD, cada um com sua própria
-  CHANGE_HISTORY de migrations. PROD é construído via promoção de QA (testes
-  integrados em ambiente real antes de produção).
+  CHANGE_HISTORY de migrations. PROD é construído via promoção de QA, com testes
+  integrados em ambiente real antes de produção.
 - **Infraestrutura como código**: schemachange para Snowflake, scripts PowerShell
-  para GCP. Nenhuma alteração em produção é feita pelo console.
+  para GCP. 
 - **CI/CD com GitHub Actions**: pull requests rodam validação, merge na branch
-  `main` deploya em produção (com aprovação manual via Environment Protection).
+  `main` deploya em produção.
 - **RBAC com least privilege**: três roles funcionais (ingestão, transformação,
   consumo), service accounts isolados por workload, deploy automatizado sem
   ACCOUNTADMIN.
@@ -124,19 +124,15 @@ ao domínio de e-commerce:
 Decisões importantes documentadas em `docs/adr/`. Entre elas:
 
 - **schemachange sobre Terraform**: separação clara entre DDL (migrations) e
-  state management. Para Snowflake especificamente, o overhead do Terraform
-  não compensa.
+  state management. 
 - **Três ambientes em conta única**: isolamento via databases distintos,
-  com CHANGE_HISTORY separada por ambiente. Custo viável para portfólio
-  sem perder o conceito de promoção entre ambientes.
+  com CHANGE_HISTORY separada por ambiente. 
 - **Ingestão sem broker de eventos intermediário**: GCS atua como camada de
   persistência e replay; Pub/Sub serve apenas para notificação, não como
-  event bus de domínio. Decisão tomada após avaliar trade-offs com a versão
-  com broker explícito (descartada por não haver múltiplos produtores ou
-  consumidores que justificassem).
+  event bus de domínio.
 - **SVC_DEPLOY com privilégios mínimos**: service account de CI/CD recebe
   apenas SYSADMIN + SECURITYADMIN + CREATE INTEGRATION ON ACCOUNT. Operações
-  que exigem ACCOUNTADMIN são executadas manualmente por humano com MFA.
+  que exigem ACCOUNTADMIN são executadas manualmente com acesso seguro via MFA.
 
 ## Setup e operação
 
