@@ -151,7 +151,145 @@ models:
         description: "True se pedido chegou a estado terminal (delivered ou canceled)."
         tests:
           - not_null
+  - name: fct_order_lifecycle
+    description: |
+      Transactional fact com 1 linha por mudanca de status.
+      Source: stg_orders_status_changed enriquecido com atributos
+      do pedido (amount, customer_id, etc.).
+      
+      Use casos:
+      - Funil de conversao entre status
+      - Analise de tempo entre transicoes
+      - Distribuicao temporal de mudancas
+    columns:
+      - name: lifecycle_sk
+        description: "Surrogate key do evento (MD5 do event_id)."
+        tests:
+          - unique
+          - not_null
+      - name: event_id
+        description: "Natural key do evento de status change."
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Identificador do pedido relacionado."
+        tests:
+          - not_null
+      - name: order_sk
+        description: "FK para fct_orders."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('fct_orders')
+              field: order_sk
+      - name: customer_sk
+        description: "FK para dim_customers."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_sk
+      - name: changed_date_key
+        description: "FK para dim_date — data da transicao."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: old_status
+        description: "Status antes da transicao."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['created', 'paid', 'shipped', 'delivered', 'canceled']
+      - name: new_status
+        description: "Status apos a transicao."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['created', 'paid', 'shipped', 'delivered', 'canceled']
+      - name: order_amount
+        description: "Valor do pedido (denormalizado de fct_orders)."
+        tests:
+          - not_null
+          
+  - name: mart_daily_revenue
+    description: |
+      Mart de receita diaria por estado.
+      Granularidade: 1 linha por (dia, estado).
+      Pronto para consumo de BI (Power BI, Tableau, Looker).
+      
+      Use cases:
+      - Dashboard executivo de vendas
+      - Drill-down geografico de receita
+      - Analise de sazonalidade (dia da semana, mes)
+    columns:
+      - name: day_date_key
+        description: "FK para dim_date."
+        tests:
+          - not_null
+      - name: customer_state
+        description: "UF do cliente."
+        tests:
+          - not_null
+      - name: orders_count
+        description: "Numero de pedidos unicos no dia/estado."
+        tests:
+          - not_null
+      - name: gross_revenue
+        description: "Receita bruta total."
+        tests:
+          - not_null
+      - name: avg_order_value
+        description: "Ticket medio do dia/estado."
+        tests:
+          - not_null
+      - name: completion_rate
+        description: "Taxa de pedidos completos (0-1)."
+        tests:
+          - not_null
+      - name: delivery_rate
+        description: "Taxa de pedidos entregues (0-1)."
+        tests:
+          - not_null
 
+  - name: mart_order_funnel
+    description: |
+      Mart de analise de conversao entre status do pedido.
+      Granularidade: 1 linha por status do funil (4 linhas).
+      Calcula taxa de conversao, drop-off e tempo medio entre etapas.
+      
+      Nota: o gerador de eventos atual permite saltos entre status,
+      portanto orders_reached em 'paid'/'shipped' pode subestimar
+      a verdade do dominio (alguns pedidos vao direto a 'delivered').
+      
+      Use cases:
+      - Identificar gargalos no fluxo de pedido
+      - SLA de processamento
+      - Comparar conversao entre periodos
+    columns:
+      - name: funnel_step
+        description: "Ordem do passo no funil (1-4)."
+        tests:
+          - unique
+          - not_null
+      - name: status_name
+        description: "Nome do status."
+        tests:
+          - unique
+          - not_null
+          - accepted_values:
+              values: ['created', 'paid', 'shipped', 'delivered']
+      - name: orders_reached
+        description: "Numero de pedidos que atingiram este status."
+        tests:
+          - not_null
+      - name: conversion_rate
+        description: "Proporcao em relacao ao topo do funil (0-1)."
+        tests:
+          - not_null
+          
 seeds:
   - name: dim_products
     description: |
