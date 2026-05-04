@@ -256,21 +256,20 @@ models:
 
   - name: mart_order_funnel
     description: |
-      Mart de analise de conversao entre status do pedido.
-      Granularidade: 1 linha por status do funil (4 linhas).
-      Calcula taxa de conversao, drop-off e tempo medio entre etapas.
+      Distribuicao de pedidos por status atual.
+      Granularidade: 1 linha por status presente nos dados.
       
-      Nota: o gerador de eventos atual permite saltos entre status,
-      portanto orders_reached em 'paid'/'shipped' pode subestimar
-      a verdade do dominio (alguns pedidos vao direto a 'delivered').
+      Importante: este NAO eh um funil cumulativo (que assumiria
+      passagem por estados anteriores). Reflete onde os pedidos
+      estao no momento atual da query.
       
       Use cases:
-      - Identificar gargalos no fluxo de pedido
-      - SLA de processamento
-      - Comparar conversao entre periodos
+      - "Quantos pedidos pendentes de pagamento?"
+      - "Distribuicao de pedidos por status"
+      - "Receita parada em cada status"
     columns:
       - name: funnel_step
-        description: "Ordem do passo no funil (1-4)."
+        description: "Ordem do passo no funil (1-5)."
         tests:
           - unique
           - not_null
@@ -280,15 +279,15 @@ models:
           - unique
           - not_null
           - accepted_values:
-              values: ['created', 'paid', 'shipped', 'delivered']
-      - name: orders_reached
-        description: "Numero de pedidos que atingiram este status."
+              values: ['created', 'paid', 'shipped', 'delivered', 'canceled']
+      - name: orders_count
+        description: "Numero de pedidos atualmente neste status."
         tests:
           - not_null
-      - name: conversion_rate
-        description: "Proporcao em relacao ao topo do funil (0-1)."
+      - name: pct_of_total
+        description: "Proporcao em relacao ao total de pedidos (0-1)."
         tests:
-          - not_null
+          - not_null  
           
 seeds:
   - name: dim_products
