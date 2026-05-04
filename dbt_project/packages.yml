@@ -1,6 +1,6 @@
 # Uncomment the lines below and run dbt deps to use the Snowflake semantic view materialization
-packages:
+# packages:
   # - package: Snowflake-Labs/dbt_semantic_view
   #   version: 1.0.3
-  - package: dbt-labs/dbt_utils
-    version: [">=1.1.0", "<2.0.0"]
+  # - package: dbt-labs/dbt_utils
+  #   version: [">=1.1.0", "<2.0.0"]

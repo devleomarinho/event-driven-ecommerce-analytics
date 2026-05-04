@@ -23,7 +23,7 @@ models:
       +materialized: table
       schema: gold
 seeds:
-  event_driven_analytics:
+  event_driven_gcp_snow:
     +schema: gold
     products:
       +column_types:
