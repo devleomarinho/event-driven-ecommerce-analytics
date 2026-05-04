@@ -1,0 +1,18 @@
+[project]
+name = "ingestion"
+version = "0.1.0"
+description = "Cloud Function que gera eventos sinteticos de e-commerce e publica no GCS"
+requires-python = ">=3.11"
+
+dependencies = [
+    "pydantic>=2.0,<3.0",
+    "faker>=20.0",
+    "google-cloud-storage>=2.10",
+    "python-ulid>=2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
