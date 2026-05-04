@@ -1,0 +1,130 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: |
+      Dimensao de customers em SCD1.
+      Granularidade: 1 linha por customer_id.
+      Atributos refletem o ESTADO ATUAL — historico de mudancas
+      nao e preservado nesta dimensao.
+      
+      Para analise temporal de mudancas, ver fct_customer_changes (futuro).
+    columns:
+      - name: customer_sk
+        description: Surrogate key (MD5 do customer_id). Chave para joins de fatos.
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Natural key — identificador original do customer no source.
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        description: Nome do customer (nao muta no nosso modelo).
+        tests:
+          - not_null
+      - name: email
+        description: Email atual — reflete ultimo update se houve, senao registered.
+        tests:
+          - not_null
+      - name: state
+        description: UF brasileira atual.
+        tests:
+          - not_null
+      - name: registered_at
+        description: Timestamp UTC do customer_registered original.
+        tests:
+          - not_null
+      - name: last_updated_at
+        description: Timestamp da mudanca mais recente (registered ou ultimo update).
+        tests:
+          - not_null
+      - name: has_been_updated
+        description: True se houve algum customer_updated apos registration.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+              
+  - name: dim_date
+    description: |
+      Dimensao de calendario com granularidade diaria.
+      Range: 2024-01-01 ate 2027-12-31 (~1.461 linhas).
+      Atributos pre-calculados (year, month, quarter, is_weekend, etc.)
+      para evitar EXTRACT em queries downstream.
+      
+      Joins recomendados:
+      - fct_orders.created_date_key = dim_date.date_key
+      - fct_order_lifecycle.changed_date_key = dim_date.date_key
+    columns:
+      - name: date_key
+        description: "SK no formato YYYYMMDD (ex: 20260502)."
+        tests:
+          - unique
+          - not_null
+      - name: full_date
+        description: "Data crua."
+        tests:
+          - unique
+          - not_null
+      - name: year
+        tests: [not_null]
+      - name: month
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      - name: quarter
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4]
+      - name: semester
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2]
+      - name: is_weekend
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: is_weekday
+        tests:
+          - not_null
+
+
+
+seeds:
+  - name: products
+    description: |
+      Catalogo estatico de produtos.
+      Seed CSV versionado no repo, materializado como tabela em GOLD.
+      Em producao real, viraria fonte de catalogo (Postgres, API).
+    columns:
+      - name: product_id
+        description: "Identificador unico do produto (formato PROD-NNN)."
+        tests:
+          - unique
+          - not_null
+      - name: product_name
+        description: "Nome comercial do produto."
+        tests:
+          - not_null
+      - name: category
+        description: "Categoria do produto."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['ELETRONICOS', 'INFORMATICA', 'MODA', 'CASA']
+      - name: unit_price
+        description: "Preco unitario em BRL."
+        tests:
+          - not_null
+      - name: is_active
+        description: "Flag de produto ativo no catalogo (false = descontinuado)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]

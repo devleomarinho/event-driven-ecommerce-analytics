@@ -27,7 +27,8 @@ seeds:
     +schema: gold
     products:
       +column_types:
-        product_id:    VARCHAR
-        product_name:  VARCHAR
-        category:      VARCHAR
-        unit_price:    DECIMAL(10,2)
+        product_id: VARCHAR
+        product_name: VARCHAR
+        category: VARCHAR
+        unit_price: DECIMAL(10,2)
+        is_active: B  OOLEAN

@@ -1,0 +1,21 @@
+product_id,product_name,category,unit_price,is_active
+PROD-001,Smartphone Samsung Galaxy A54,ELETRONICOS,1899.90,true
+PROD-002,Smartphone iPhone 14,ELETRONICOS,4999.00,true
+PROD-003,Fone JBL Tune 510BT,ELETRONICOS,249.90,true
+PROD-004,Smartwatch Xiaomi Mi Band 8,ELETRONICOS,329.00,true
+PROD-005,Notebook Dell Inspiron 15,INFORMATICA,3799.00,true
+PROD-006,Notebook Lenovo Ideapad 3,INFORMATICA,2999.00,true
+PROD-007,Monitor LG 24 polegadas Full HD,INFORMATICA,899.90,true
+PROD-008,Teclado Mecanico Redragon Kumara,INFORMATICA,289.90,true
+PROD-009,Mouse Logitech MX Master 3,INFORMATICA,649.00,true
+PROD-010,Camisa Polo Lacoste Original,MODA,499.90,true
+PROD-011,Calca Jeans Levis 511,MODA,389.00,true
+PROD-012,Tenis Nike Air Max,MODA,799.90,true
+PROD-013,Tenis Adidas Ultraboost,MODA,1199.00,true
+PROD-014,Jaqueta Couro Sintetico,MODA,279.90,false
+PROD-015,Geladeira Brastemp Frost Free,CASA,3499.00,true
+PROD-016,Microondas Electrolux 20L,CASA,599.90,true
+PROD-017,Aspirador de Po WAP,CASA,449.00,true
+PROD-018,Mesa de Jantar Madeira 6 Lugares,CASA,1899.00,true
+PROD-019,Sofa Retratil 3 Lugares,CASA,2499.00,true
+PROD-020,Luminaria de Mesa LED,CASA,89.90,false
