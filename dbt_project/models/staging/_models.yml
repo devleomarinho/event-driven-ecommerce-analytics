@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: stg_orders_created
+    description: |
+      Eventos de pedidos criados, tipados e prontos para downstream.
+      Granularidade: 1 linha por evento (event_id unico).
+    columns:
+      - name: event_id
+        description: ULID unico do evento
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Identificador do pedido
+        tests:
+          - not_null
+      - name: customer_id
+        description: Identificador do cliente que criou o pedido
+        tests:
+          - not_null
+      - name: created_at
+        description: Timestamp UTC de criacao do pedido
+        tests:
+          - not_null
+      - name: amount
+        description: Valor do pedido
+        tests:
+          - not_null
+      - name: currency
+        description: Moeda do pedido (ISO 4217)
+      - name: item_count
+        description: Quantidade de itens no pedido
+        tests:
+          - not_null
+
+  - name: stg_orders_status_changed
+    description: |
+      Mudancas de status dos pedidos.
+      Granularidade: 1 linha por mudanca de status.
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+      - name: order_id
+        tests: [not_null]
+      - name: changed_at
+        tests: [not_null]
+      - name: old_status
+        tests: [not_null]
+      - name: new_status
+        tests: [not_null]
+
+  - name: stg_customers_registered
+    description: |
+      Customers registrados.
+      Granularidade: 1 linha por customer_id (unique).
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: registered_at
+        tests: [not_null]
+      - name: customer_name
+        tests: [not_null]
+      - name: email
+        tests: [not_null]
+
+  - name: stg_customers_updated
+    description: |
+      Mudancas em atributos dos customers.
+      Granularidade: 1 linha por mudanca.
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests: [not_null]
+      - name: field_changed
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['email', 'state']

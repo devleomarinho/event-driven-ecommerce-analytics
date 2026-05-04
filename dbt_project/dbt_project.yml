@@ -1,0 +1,34 @@
+name: event_driven_gcp_snow
+version: 1.0.0
+config-version: 2
+profile: event_driven_gcp_snow
+model-paths:
+  - models
+analysis-paths:
+  - analyses
+test-paths:
+  - tests
+seed-paths:
+  - seeds
+macro-paths:
+  - macros
+snapshot-paths:
+  - snapshots
+models:
+  event_driven_gcp_snow:
+    staging:
+      +materialized: view
+      +schema: gold
+    marts:
+      +materialized: table
+      +schema: gold
+seeds:
+  event_driven_gcp_snow:
+    +schema: gold
+    dim_products:
+      +column_types:
+        product_id: VARCHAR
+        product_name: VARCHAR
+        category: VARCHAR
+        unit_price: DECIMAL(10,2)
+        is_active: BOOLEAN
