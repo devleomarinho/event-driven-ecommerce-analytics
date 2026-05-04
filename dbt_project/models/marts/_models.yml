@@ -94,7 +94,63 @@ models:
         tests:
           - not_null
 
-
+  - name: fct_orders
+    description: |
+      Snapshot fact com estado atual de cada pedido.
+      Granularidade: 1 linha por order_id.
+      Combina stg_orders_created (base) com a ultima transicao
+      de stg_orders_status_changed (estado atual).
+      
+      Joins recomendados:
+      - fct_orders.customer_sk = dim_customers.customer_sk
+      - fct_orders.created_date_key = dim_date.date_key
+    columns:
+      - name: order_sk
+        description: "Surrogate key do pedido (MD5 do order_id)."
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Natural key do pedido (dimensao degenerada)."
+        tests:
+          - unique
+          - not_null
+      - name: customer_sk
+        description: "FK para dim_customers."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_sk
+      - name: created_date_key
+        description: "FK para dim_date — data de criacao."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: current_status
+        description: "Status atual do pedido."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['created', 'paid', 'shipped', 'delivered', 'canceled']
+      - name: order_amount
+        description: "Valor total do pedido em moeda local."
+        tests:
+          - not_null
+      - name: item_count
+        description: "Quantidade de itens no pedido."
+        tests:
+          - not_null
+      - name: is_delivered
+        description: "True se pedido foi entregue."
+        tests:
+          - not_null
+      - name: is_completed
+        description: "True se pedido chegou a estado terminal (delivered ou canceled)."
+        tests:
+          - not_null
 
 seeds:
   - name: dim_products
