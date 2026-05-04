@@ -7,4 +7,19 @@ event_driven_gcp_snow:
       warehouse: WH_TRANSFORM_S
       database: ANALYTICS_DEV
       schema: GOLD
-      threads: 8
+      threads: 4
+    qa:
+      type: snowflake
+      role: ROLE_TRANSFORMER
+      warehouse: WH_TRANSFORM_S
+      database: ANALYTICS_QA
+      schema: GOLD
+      threads: 4
+    prod:
+      type: snowflake
+      role: ROLE_TRANSFORMER
+      warehouse: WH_TRANSFORM_S
+      database: ANALYTICS_PROD
+      schema: GOLD
+      threads: 4
+      

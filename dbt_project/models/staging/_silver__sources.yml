@@ -1,0 +1,59 @@
+version: 2
+
+sources:
+  - name: silver
+    database: "{{ target.database }}"
+    schema: SILVER
+    description: |
+      Camada Silver do projeto event-driven-analytics.
+      Dynamic Tables tipadas e deduplicadas a partir de Bronze.RAW_EVENTS.
+      Refresh automatico a cada 5 minutos.
+
+    tables:
+      - name: dt_orders_created
+        description: "Eventos order_created tipados"
+        columns:
+          - name: event_id
+            description: "ULID unico por evento"
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            tests: [not_null]
+          - name: customer_id
+            tests: [not_null]
+          - name: amount
+            tests:
+              - not_null
+
+      - name: dt_orders_status_changed
+        description: "Eventos order_status_changed tipados"
+        columns:
+          - name: event_id
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            tests: [not_null]
+
+      - name: dt_customers_registered
+        description: "Eventos customer_registered tipados"
+        columns:
+          - name: event_id
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            tests:
+              - unique
+              - not_null
+
+      - name: dt_customers_updated
+        description: "Eventos customer_updated tipados"
+        columns:
+          - name: event_id
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            tests: [not_null]

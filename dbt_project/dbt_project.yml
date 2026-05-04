@@ -16,4 +16,18 @@ snapshot-paths:
   - snapshots
 models:
   event_driven_gcp_snow:
-    +materialized: view
+    staging:
+      +materialized: view
+      schema: gold
+    marts:
+      +materialized: table
+      schema: gold
+seeds:
+  event_driven_analytics:
+    +schema: gold
+    products:
+      +column_types:
+        product_id:    VARCHAR
+        product_name:  VARCHAR
+        category:      VARCHAR
+        unit_price:    DECIMAL(10,2)
