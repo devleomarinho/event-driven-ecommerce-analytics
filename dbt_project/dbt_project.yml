@@ -18,10 +18,10 @@ models:
   event_driven_gcp_snow:
     staging:
       +materialized: view
-      schema: gold
+      +schema: gold
     marts:
       +materialized: table
-      schema: gold
+      +schema: gold
 seeds:
   event_driven_gcp_snow:
     +schema: gold

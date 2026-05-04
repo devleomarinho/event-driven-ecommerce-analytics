@@ -3,6 +3,8 @@ event_driven_gcp_snow:
   outputs:
     dev:
       type: snowflake
+      account: BOWOYMW-EP41167
+      user: DEVLEO1984
       role: ROLE_TRANSFORMER
       warehouse: WH_TRANSFORM_S
       database: ANALYTICS_DEV
@@ -10,6 +12,8 @@ event_driven_gcp_snow:
       threads: 4
     qa:
       type: snowflake
+      account: BOWOYMW-EP41167
+      user: DEVLEO1984
       role: ROLE_TRANSFORMER
       warehouse: WH_TRANSFORM_S
       database: ANALYTICS_QA
@@ -17,6 +21,8 @@ event_driven_gcp_snow:
       threads: 4
     prod:
       type: snowflake
+      account: BOWOYMW-EP41167
+      user: DEVLEO1984
       role: ROLE_TRANSFORMER
       warehouse: WH_TRANSFORM_S
       database: ANALYTICS_PROD
