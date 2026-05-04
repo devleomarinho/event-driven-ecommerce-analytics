@@ -1,0 +1,40 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+
+# Virtual envs
+.venv
+.venv-dbt
+venv
+
+# Editor
+.vscode
+.idea
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Build/dist
+build
+dist
+*.egg-info
+
+# Logs
+*.log
+
+# Docs/config locais (nao precisam estar no container)
+README.md
+.env
+.env.example
+
+# Outros nao relevantes
+tests
