@@ -97,7 +97,7 @@ models:
 
 
 seeds:
-  - name: products
+  - name: dim_products
     description: |
       Catalogo estatico de produtos.
       Seed CSV versionado no repo, materializado como tabela em GOLD.

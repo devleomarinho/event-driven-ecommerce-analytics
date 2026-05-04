@@ -25,10 +25,10 @@ models:
 seeds:
   event_driven_gcp_snow:
     +schema: gold
-    products:
+    dim_products:
       +column_types:
         product_id: VARCHAR
         product_name: VARCHAR
         category: VARCHAR
         unit_price: DECIMAL(10,2)
-        is_active: B  OOLEAN
+        is_active: BOOLEAN
