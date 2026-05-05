@@ -1,0 +1,118 @@
+# =====================================================================
+# Schemachange — deploy de migrations Snowflake
+#
+# Fluxo:
+#   push em feature/* ou dev      →  deploy em DEV
+#   push em dev                   →  deploy em QA
+#   push em main                  →  deploy em PROD
+#
+# Dispara apenas quando ha mudancas em infra/snowflake/**
+# =====================================================================
+
+name: schemachange-deploy
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - dev
+      - main
+    paths:
+      - 'infra/snowflake/**'
+      - '.github/workflows/schemachange.yml'
+
+  # Permite execucao manual (Run workflow) — util para hotfix
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Ambiente alvo (dev, qa, prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - qa
+          - prod
+
+# Garante que só uma execucao por branch rode por vez
+# (evita race condition em deploys consecutivos)
+concurrency:
+  group: schemachange-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  determine-environment:
+    name: Determinar ambiente alvo
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.set-env.outputs.target }}
+    steps:
+      - name: Definir ambiente
+        id: set-env
+        run: |
+          # Se workflow_dispatch, usa input do usuario
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "target=${{ inputs.target_env }}" >> $GITHUB_OUTPUT
+          
+          # main → prod
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "target=prod" >> $GITHUB_OUTPUT
+          
+          # dev → qa
+          elif [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            echo "target=qa" >> $GITHUB_OUTPUT
+          
+          # feature/* → dev
+          else
+            echo "target=dev" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    name: Deploy schemachange (${{ needs.determine-environment.outputs.target }})
+    needs: determine-environment
+    runs-on: ubuntu-latest
+    
+    # Environment Protection do GitHub:
+    # - dev: deploy automatico
+    # - qa: deploy automatico
+    # - prod: requer approval manual (configurar no GitHub Settings)
+    environment: ${{ needs.determine-environment.outputs.target }}
+    
+    steps:
+      - name: Checkout do codigo
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar schemachange
+        run: pip install schemachange==4.3.3
+
+      - name: Preparar chave privada
+        run: |
+          # Cria diretorio para a chave
+          mkdir -p ~/.snowflake/keys
+          
+          # Decodifica a chave do secret e salva
+          echo "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" | base64 -d > ~/.snowflake/keys/svc_deploy_rsa_key.p8
+          chmod 600 ~/.snowflake/keys/svc_deploy_rsa_key.p8
+
+      - name: Executar schemachange
+        env:
+          SNOWFLAKE_ACCOUNT:    ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER:       ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_ROLE:       ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE:  ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_AUTHENTICATOR: SNOWFLAKE_JWT
+          SNOWFLAKE_PRIVATE_KEY_PATH: /home/runner/.snowflake/keys/svc_deploy_rsa_key.p8
+          TARGET_ENV: ${{ needs.determine-environment.outputs.target }}
+        run: |
+          schemachange deploy \
+            --config-folder ./infra/snowflake/environments \
+            --config-file-name ${TARGET_ENV}.yml
+
+      - name: Limpar chave privada
+        if: always()
+        run: rm -f ~/.snowflake/keys/svc_deploy_rsa_key.p8
