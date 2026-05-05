@@ -7,6 +7,7 @@
 
 Pipeline analítica completa, **orientada a eventos**, integrando Google Cloud Platform e Snowflake. O projeto demonstra ingestão em near-real-time, modelagem dimensional sobre arquitetura medalhão (Bronze/Silver/Gold) e deploy versionado de IaC (infraestrutura como código).
 
+> 🇺🇸 For the English version, read at [README.en.md](README.en.md).
 ---
 
 ## Por que arquitetura event-driven?
