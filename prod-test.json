@@ -1,1 +1,0 @@
-﻿{"event_id": "prod-test-001", "event_type": "order_created", "event_timestamp": "2026-04-29T13:00:00Z", "event_version": "1.0", "payload": {"order_id": "ord-prod-1", "customer_id": "cust-prod-1", "amount": 299.90}}
