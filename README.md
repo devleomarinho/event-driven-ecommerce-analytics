@@ -3,9 +3,9 @@
 [![GitHub Actions](https://github.com/devleomarinho/event-driven-ecommerce-analytics/actions/workflows/schemachange.yml/badge.svg)](https://github.com/devleomarinho/event-driven-ecommerce-analytics/actions)
 ![Snowflake](https://img.shields.io/badge/Snowflake-Enterprise-29B5E8)
 ![dbt](https://img.shields.io/badge/dbt-1.9-FF694B)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB)
+![Python](https://img.shields.io/badge/Python-3.13-3776AB)
 
-Pipeline analítica completa, **orientada a eventos**, integrando Google Cloud Platform e Snowflake. O projeto demonstra ingestão em near-real-time, modelagem dimensional sobre arquitetura medalhão (Bronze/Silver/Gold) e deploy versionado de infraestrutura como código.
+Pipeline analítica completa, **orientada a eventos**, integrando Google Cloud Platform e Snowflake. O projeto demonstra ingestão em near-real-time, modelagem dimensional sobre arquitetura medalhão (Bronze/Silver/Gold) e deploy versionado de IaC (infraestrutura como código).
 
 ---
 
@@ -290,7 +290,7 @@ Esta seção documenta as escolhas técnicas mais relevantes do projeto e o raci
 
 ### ADR-003: dbt Projects on Snowflake em vez de dbt Core local
 
-**Decisão.** A camada Gold usa dbt Projects on Snowflake (recurso GA em 2024), executado via Snowsight Workspace.
+**Decisão.** A camada Gold usa dbt Projects on Snowflake, executado via Snowsight Workspace.
 
 **Alternativa considerada.** dbt Core instalado localmente, conectando ao Snowflake via `profiles.yml` (padrão tradicional).
 
@@ -306,7 +306,7 @@ Esta seção documenta as escolhas técnicas mais relevantes do projeto e o raci
 
 **Decisão.** O gerador de eventos é containerizado como Cloud Run Job, executado sob demanda via `gcloud run jobs execute`.
 
-**Alternativa considerada.** Cloud Function HTTP-triggered (a opção mais comum em tutoriais).
+**Alternativa considerada.** Cloud Function HTTP-triggered.
 
 **Razões.**
 
@@ -322,7 +322,6 @@ Esta seção documenta as escolhas técnicas mais relevantes do projeto e o raci
 
 **Razões.**
 
-- Para portfólio com 1 operador humano, hierarquia complexa adiciona overhead sem ganho prático.
 - 3 roles funcionais já demonstram o conceito de least privilege: cada role tem propósito específico (ingestão, transformação, leitura analítica).
 - ROLE_DEPLOY assume outras roles via grant (`GRANT ROLE ROLE_INGESTION TO ROLE ROLE_DEPLOY`), permitindo que objetos criados em deploy tenham owner semanticamente correto (ROLE_INGESTION para Bronze, ROLE_TRANSFORMER para Silver/Gold).
 
@@ -341,11 +340,10 @@ A configuração inicial envolve passos manuais (key-pair Snowflake, IAM no GCP,
 | 03 | Setup do projeto GCP | APIs, buckets, tópicos Pub/Sub, subscriptions |
 | 04 | IAM GCP para Snowflake | Bindings entre service accounts da Snowflake e recursos GCP |
 | 05 | Deploy de migrations | Uso do schemachange contra DEV, QA e PROD |
-| 06 | Troubleshooting | Erros comuns e diagnóstico |
-| 07 | Cloud Run Job | Build de imagem, deploy, execução manual |
-| 08 | Setup do dbt Projects on Snowflake | Pré-requisitos, API Integration, Git Repository, Workspace |
-| 09 | Operação do dbt no Workspace | Workflow de desenvolvimento, comandos úteis, troubleshooting |
-| 10 | CI/CD com GitHub Actions | Configuração de secrets, environments, workflow |
+| 06 | Cloud Run Job | Build de imagem, deploy, execução manual |
+| 07 | Setup do dbt Projects on Snowflake | Pré-requisitos, API Integration, Git Repository, Workspace |
+| 08 | Operação do dbt no Workspace | Workflow de desenvolvimento, comandos úteis, troubleshooting |
+| 09 | CI/CD com GitHub Actions | Configuração de secrets, environments, workflow |
 
 ---
 
@@ -368,6 +366,5 @@ Para reproduzir o projeto:
 
 ## Sobre
 
-Projeto desenvolvido por **Leonardo Marinho** ([devleomarinho](https://github.com/devleomarinho)), engenheiro de dados com foco em arquitetura cloud-native e modernização de pipelines analíticos.
-
-Feedback, perguntas ou sugestões são bem-vindos via [issues](https://github.com/devleomarinho/event-driven-ecommerce-analytics/issues).
+Projeto desenvolvido por **Leonardo Marinho**.
+[LinkedIn](https://www.linkedin.com/in/devleomarinho/) | [Email](mailto:dev.leomarinho@gmail.com)
