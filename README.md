@@ -15,12 +15,12 @@ Pipeline analítica completa, **orientada a eventos**, integrando Google Cloud P
 Pipelines tradicionais de analytics operam em **batch agendado**: a cada N minutos/horas, um job verifica se há dados novos e os processa. Esse modelo tem três problemas conhecidos:
 
 1. **Latência fixa pelo schedule.** Mesmo que dados cheguem em segundos, o consumidor só vê após o próximo run agendado.
-2. **Polling desperdiçado.** A maioria das execuções não encontra dados novos, mas paga o custo de inicializar e consultar mesmo assim.
+2. **Polling desperdiçado.** Muitas vezes as execuções não encontram dados novos, mas paga o custo de inicializar e consultar mesmo assim.
 3. **Backpressure invisível.** Se o produtor acelera, o consumidor agendado pode não acompanhar, aumentando a defasagem silenciosamente.
 
 A arquitetura event-driven inverte essa lógica: cada componente reage a notificações do anterior, sem carga agendada. Latência é proporcional ao tempo de processamento real, não à frequência do schedule. O custo computacional é proporcional ao volume de eventos, não ao tempo decorrido.
 
-Neste projeto, **nenhuma etapa usa polling**:
+Neste projeto, o fluxo é:
 
 - O produtor (Cloud Run Job) escreve direto em GCS quando executa.
 - GCS emite notificação Pub/Sub no momento da escrita.
@@ -240,7 +240,7 @@ O Cloud Run Job é deployado manualmente via comandos `gcloud` documentados no R
 
 Esta seção documenta as escolhas técnicas mais relevantes do projeto e o raciocínio por trás de cada uma.
 
-### ADR-001: Bronze pura (3 colunas) em vez de schema estruturado
+### ADR-001: Bronze enxuta em vez de schema estruturado
 
 **Decisão.** A tabela `RAW_EVENTS` tem apenas 3 colunas: `raw_data` (VARIANT), `_source_file` e `_ingested_at`. Toda a estrutura do evento (event_id, event_type, payload, etc.) fica dentro do VARIANT.
 
@@ -249,7 +249,7 @@ Esta seção documenta as escolhas técnicas mais relevantes do projeto e o raci
 **Razões.**
 
 - Schema-on-read elimina acoplamento com o produtor. Mudanças no schema dos eventos não quebram Bronze.
-- Bronze fica conceitualmente clara: "cópia literal do que veio". Tipagem e validação acontecem em Silver, onde já fazem sentido para queries downstream.
+- Bronze funciona como uma cópia literal do que veio da origem. Tipagem e validação acontecem em Silver, onde já fazem sentido para queries downstream.
 - Em produção real, o validador de eventos no produtor (que poderia ser Pydantic, Avro Schema Registry, etc.) é a primeira linha de defesa. Bronze é a segunda — preserva tudo, mesmo que o validador falhe.
 
 ### ADR-002: Dynamic Tables em vez de Streams + Tasks
@@ -272,7 +272,6 @@ Esta seção documenta as escolhas técnicas mais relevantes do projeto e o raci
 
 **Razões.**
 
-- Recurso novo da Snowflake (GA em 2024). Demonstra atualização técnica e exploração de releases.
 - Reduz superfície operacional: dbt roda dentro do Snowflake, sem necessidade de credentials externas, ambiente Python local, ou agendamento separado.
 - Workspace integrado fornece IDE web, sync bidirecional com Git e execução de comandos (run, test, build) sem ferramenta extra.
 
@@ -298,10 +297,10 @@ Esta seção documenta as escolhas técnicas mais relevantes do projeto e o raci
 
 **Razões.**
 
-- 3 roles funcionais já demonstram o conceito de least privilege: cada role tem propósito específico (ingestão, transformação, leitura analítica).
+- 3 roles funcionais: cada role tem propósito específico (ingestão, transformação, leitura analítica).
 - ROLE_DEPLOY assume outras roles via grant (`GRANT ROLE ROLE_INGESTION TO ROLE ROLE_DEPLOY`), permitindo que objetos criados em deploy tenham owner semanticamente correto (ROLE_INGESTION para Bronze, ROLE_TRANSFORMER para Silver/Gold).
 
-**Trade-off conhecido.** A simplicidade tem custo: durante o desenvolvimento, foram observados conflitos de ownership quando objetos eram criados manualmente em sandbox (com role X) e depois recriados via migration (com role Y). Em produção real, hierarquia mais formal previne isso.
+**Trade-off conhecido.** Podem ocorrer conflitos de ownership caso objetos sejam criados manualmente em sandbox (com role X) e depois recriados via migration (com role Y). Em produção real, hierarquia mais formal previne isso.
 
 ---
 
