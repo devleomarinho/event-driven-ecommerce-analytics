@@ -144,6 +144,9 @@ RAW_EVENTS (
 
 Filosofia: **schema-on-read**. Toda a estrutura do evento (event_id, event_type, payload) está em VARIANT — extração tipada acontece em Silver. Vantagem: Bronze nunca quebra por mudança de schema do produtor; é a fonte de verdade para reprocessamento.
 
+<img width="1856" height="935" alt="image" src="https://github.com/user-attachments/assets/a1350d8a-0371-4350-af92-deae3b6d7835" />
+
+
 ### Silver — `ANALYTICS_<env>.SILVER.*`
 
 Quatro Dynamic Tables (uma por tipo de evento), com `TARGET_LAG = 5 minutes`:
@@ -161,6 +164,8 @@ QUALIFY ROW_NUMBER() OVER (
     ORDER BY _ingested_at
 ) = 1
 ```
+
+<img width="1853" height="772" alt="image" src="https://github.com/user-attachments/assets/575c9f18-3613-4179-b689-9ac0454000d3" />
 
 ### Gold — `ANALYTICS_<env>.GOLD.*` (via dbt)
 
@@ -184,6 +189,8 @@ Modelagem dimensional em estrela:
 - `MART_ORDER_FUNNEL` — distribuição de pedidos por status atual.
 
 ---
+
+<img width="1529" height="935" alt="image" src="https://github.com/user-attachments/assets/412517d2-8ae9-4a26-989b-ff66cdc0665a" />
 
 ## Geração de dados sintéticos
 
@@ -214,6 +221,8 @@ git push em main       →  GitHub Actions  →  schemachange deploy PROD (com a
 **Environment Protection**: o ambiente `prod` no GitHub exige approval manual antes do deploy (dupla checagem após merge em main).
 
 **Idempotência**: schemachange compara checksum das migrations com `CHANGE_HISTORY` do ambiente. Migrations já aplicadas viram no-op automaticamente.
+
+<img width="1901" height="787" alt="image" src="https://github.com/user-attachments/assets/28bf851a-c33f-4059-832e-37d122c5beda" />
 
 ### dbt em desenvolvimento manual
 
