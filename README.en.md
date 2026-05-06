@@ -55,32 +55,7 @@ These events arrive as NDJSON in GCS, are typed and deduplicated in Silver (Dyna
 
 ## Architecture
 
-```text
-                  GCP                                            Snowflake
-
-  ┌──────────────────────────────┐               ┌──────────────────────────────────┐
-  │                              │               │                                  │
-  │    Cloud Run Job (Python)    │               │   Bronze (RAW_EVENTS)            │
-  │    └─ Faker + coherent       │               │   └─ raw_data: VARIANT (NDJSON)  │
-  │       batch logic            │               │      _source_file, _ingested_at  │
-  │                              │               │              │                   │
-  │              │               │               │              ▼                   │
-  │              ▼               │               │   Silver (Dynamic Tables)        │
-  │    GCS bucket /events/       │               │   ├─ DT_ORDERS_CREATED           │
-  │    └─ NDJSON files           │               │   ├─ DT_ORDERS_STATUS_CHANGED    │
-  │              │               │               │   ├─ DT_CUSTOMERS_REGISTERED     │
-  │              ▼               │               │   └─ DT_CUSTOMERS_UPDATED        │
-  │    Pub/Sub (notification)    │               │      (TARGET_LAG = 5min)         │
-  │              │               │               │              │                   │
-  │              ▼               │               │              ▼                   │
-  │    PULL Subscription ────────┼──── auto ────▶│   Gold (dbt models)              │
-  │                              │    ingest     │   ├─ Staging (4 views)           │
-  │                              │               │   ├─ Dimensions (3 tables)       │
-  └──────────────────────────────┘               │   ├─ Facts (2 tables)            │
-                                                 │   └─ Marts (2 tables)            │
-                                                 │                                  │
-                                                 └──────────────────────────────────┘
-```
+<img width="3158" height="891" alt="diagrama_eventdriven" src="https://github.com/user-attachments/assets/15fb7fc8-3f44-4652-a3ac-991d3af524fa" />
 
 ### Key features
 
