@@ -6,7 +6,7 @@
 *.p8
 *.pem
 *.key
-*.ps1
+
 
 # Python
 __pycache__/
